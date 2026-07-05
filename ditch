@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ditch — Dig Yourself Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@400;600;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-000:#141110;
+    --soil-100:#221b16;
+    --soil-200:#3a2e22;
+    --soil-300:#5c4a37;
+    --sky-dawn:#f2a740;
+    --sky-pale:#f6e9d4;
+    --paper:#efe6d6;
+    --ink-dim:#b7a894;
+    --health:#7fa15c;
+    --mind:#5c85b8;
+    --being:#e0a83f;
+    --business:#b8563a;
+    --display:'Big Shoulders', sans-serif;
+    --body:'Inter', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--soil-000);
+    color:var(--sky-pale);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  ::selection{background:var(--sky-dawn);color:var(--soil-000);}
+
+  a{color:inherit;}
+
+  /* ---------- layout shell ---------- */
+  .rail{
+    position:fixed;
+    left:0;top:0;bottom:0;
+    width:64px;
+    background:linear-gradient(to top, var(--soil-000) 0%, var(--soil-200) 55%, var(--sky-dawn) 92%, var(--sky-pale) 100%);
+    display:flex;
+    flex-direction:column-reverse;
+    align-items:center;
+    z-index:50;
+    border-right:1px solid rgba(255,255,255,0.06);
+  }
+  .rail-band{
+    flex:1 1 0;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .rail-band .label{
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    font-family:var(--mono);
+    font-size:9px;
+    letter-spacing:0.18em;
+    color:rgba(255,255,255,0.55);
+    text-transform:uppercase;
+  }
+  .rail-marker{
+    position:absolute;
+    left:50%;
+    bottom:0%;
+    width:14px;height:14px;
+    margin-left:-7px;
+    border-radius:50%;
+    background:var(--sky-dawn);
+    box-shadow:0 0 0 4px rgba(242,167,64,0.18), 0 0 14px rgba(242,167,64,0.6);
+    transition:bottom 0.6s cubic-bezier(.3,1,.4,1);
+    z-index:5;
+  }
+  .rail-readout{
+    position:absolute;
+    bottom:8px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:var(--mono);
+    font-size:9px;
+    color:var(--soil-000);
+    background:var(--sky-pale);
+    padding:2px 4px;
+    border-radius:3px;
+    white-space:nowrap;
+    opacity:0.9;
+  }
+
+  main{
+    margin-left:64px;
+    max-width:960px;
+    padding:64px 40px 120px;
+  }
+  @media (max-width:720px){
+    .rail{
+      position:fixed; left:0; right:0; top:0; bottom:auto; height:6px; width:auto;
+      flex-direction:row;
+      background:linear-gradient(to right, var(--soil-000) 0%, var(--soil-200) 55%, var(--sky-dawn) 92%, var(--sky-pale) 100%);
+      border-right:none; border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .rail-band{display:none;}
+    .rail-marker{
+      bottom:auto; top:-4px; left:0%; margin-left:-7px;
+      transition:left 0.6s cubic-bezier(.3,1,.4,1);
+    }
+    .rail-readout{display:none;}
+    main{margin-left:0; padding:40px 20px 90px;}
+  }
+
+  /* ---------- header ---------- */
+  .wordmark{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:56px;
+  }
+  .wordmark .dot{width:6px;height:6px;background:var(--sky-dawn);border-radius:50%;}
+
+  /* ---------- hero ---------- */
+  .hero h1{
+    font-family:var(--display);
+    font-weight:900;
+    font-size:clamp(42px, 8vw, 84px);
+    line-height:0.95;
+    letter-spacing:-0.01em;
+    margin:0 0 8px;
+    text-transform:uppercase;
+  }
+  .hero h1 span{color:var(--sky-dawn);}
+  .hero p.sub{
+    font-size:17px;
+    line-height:1.55;
+    color:var(--ink-dim);
+    max-width:56ch;
+    margin:0 0 40px;
+  }
+
+  .input-block{
+    background:var(--soil-100);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px;
+    padding:22px;
+  }
+  .input-block label{
+    display:block;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--sky-dawn);
+    margin-bottom:12px;
+  }
+  textarea{
+    width:100%;
+    min-height:140px;
+    background:transparent;
+    border:none;
+    resize:vertical;
+    color:var(--sky-pale);
+    font-family:var(--body);
+    font-size:16px;
+    line-height:1.6;
+    outline:none;
+  }
+  textarea::placeholder{color:rgba(246,233,212,0.35);}
+
+  .input-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .hint{font-size:12px;color:var(--ink-dim);}
+
+  button.dig{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:16px;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    background:var(--sky-dawn);
+    color:var(--soil-000);
+    border:none;
+    padding:14px 28px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  button.dig:hover{transform:translateY(-1px); background:#ffb75a;}
+  button.dig:active{transform:translateY(0);}
+  button.dig:disabled{opacity:0.5; cursor:default; transform:none;}
+  button.dig:focus-visible{outline:2px solid var(--sky-pale); outline-offset:3px;}
+
+  /* ---------- loading ---------- */
+  .loading{
+    display:none;
+    align-items:center;
+    gap:12px;
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-top:18px;
+  }
+  .loading.active{display:flex;}
+  .spinner{
+    width:14px;height:14px;
+    border:2px solid rgba(255,255,255,0.2);
+    border-top-color:var(--sky-dawn);
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .error-box{
+    display:none;
+    margin-top:16px;
+    padding:14px 16px;
+    border-radius:8px;
+    background:rgba(184,86,58,0.12);
+    border:1px solid rgba(184,86,58,0.4);
+    color:#e7a591;
+    font-size:14px;
+  }
+  .error-box.active{display:block;}
+
+  /* ---------- results ---------- */
+  #results{display:none; margin-top:56px;}
+  #results.active{display:block;}
+
+  .verdict{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(24px,4vw,34px);
+    line-height:1.15;
+    color:var(--sky-pale);
+    border-left:3px solid var(--sky-dawn);
+    padding-left:20px;
+    margin:0 0 48px;
+    text-transform:uppercase;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:720px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--soil-100);
+    border:1px solid rgba(255,255,255,0.08);
+    border-top:4px solid var(--cat-color, var(--sky-dawn));
+    border-radius:10px;
+    padding:22px;
+  }
+  .card .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--cat-color, var(--sky-dawn));
+    margin-bottom:10px;
+  }
+  .card .diagnosis{
+    font-size:15px;
+    line-height:1.5;
+    color:var(--sky-pale);
+    margin:0 0 14px;
+  }
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px;}
+  .chip{
+    font-size:12px;
+    padding:4px 9px;
+    border-radius:100px;
+    background:rgba(255,255,255,0.06);
+    color:var(--ink-dim);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .genius{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    background:rgba(255,255,255,0.04);
+    border-radius:7px;
+    padding:10px 12px;
+    margin-bottom:16px;
+    font-size:13px;
+    line-height:1.5;
+  }
+  .genius .flag{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--cat-color,var(--sky-dawn));
+    flex:0 0 auto;
+    padding-top:2px;
+  }
+  .plan{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+  .plan li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    font-size:14px;
+    line-height:1.45;
+    cursor:pointer;
+  }
+  .plan li input{
+    appearance:none;
+    -webkit-appearance:none;
+    width:17px;height:17px;
+    flex:0 0 auto;
+    margin-top:2px;
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-radius:4px;
+    cursor:pointer;
+    position:relative;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .plan li input:checked{
+    background:var(--cat-color, var(--sky-dawn));
+    border-color:var(--cat-color, var(--sky-dawn));
+  }
+  .plan li input:checked::after{
+    content:'';
+    position:absolute;
+    left:5px; top:1.5px;
+    width:4px; height:8px;
+    border:solid var(--soil-000);
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+  .plan li span.step.done{color:var(--ink-dim); text-decoration:line-through;}
+
+  .reset-row{
+    margin-top:56px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  button.reset{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.2);
+    color:var(--sky-pale);
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:10px 16px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  button.reset:hover{border-color:var(--sky-dawn); color:var(--sky-dawn);}
+
+  footer{
+    margin-top:80px;
+    padding-top:20px;
+    border-top:1px solid rgba(255,255,255,0.08);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-dim);
+    letter-spacing:0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="rail" id="rail">
+  <div class="rail-band" style="--b:var(--business)"><span class="label">BUSINESS</span></div>
+  <div class="rail-band" style="--b:var(--health)"><span class="label">HEALTH</span></div>
+  <div class="rail-band" style="--b:var(--mind)"><span class="label">MIND</span></div>
+  <div class="rail-band" style="--b:var(--being)"><span class="label">BEING</span></div>
+  <div class="rail-marker" id="railMarker"></div>
+  <div class="rail-readout" id="railReadout">0% OUT</div>
+</div>
+
+<main>
+  <div class="wordmark"><span class="dot"></span> THE DITCH · GET OUT, THEN GO UP</div>
+
+  <section class="hero">
+    <h1>You're in<br>a <span>ditch.</span></h1>
+    <p class="sub">Dump every rotten habit, missed workout, blown deal, and 2am doomscroll below. A small model reads it, sorts the wreckage into four piles, and hands you a way out — no lectures, just moves.</p>
+
+    <div class="input-block">
+      <label for="vices">What's dragging you down</label>
+      <textarea id="vices" placeholder="Smoking a pack a day, blew the Q2 launch, doomscrolling till 3am, ghosted my trainer for a month, snapping at my team, avoiding the business bank statement, can't sleep before 1am..."></textarea>
+      <div class="input-footer">
+        <span class="hint">Be specific. Vague input gets a vague plan.</span>
+        <button class="dig" id="digBtn">Dig up my plan</button>
+      </div>
+    </div>
+    <div class="loading" id="loadingRow"><span class="spinner"></span> Reading the dirt...</div>
+    <div class="error-box" id="errorBox"></div>
+  </section>
+
+  <section id="results">
+    <p class="verdict" id="verdict"></p>
+    <div class="grid" id="cardGrid"></div>
+    <div class="reset-row">
+      <button class="reset" id="resetBtn">Start over</button>
+    </div>
+  </section>
+
+  <footer>Small model. Big shovel. Nothing you type is saved anywhere — it lives in this tab only.</footer>
+</main>
+
+<script>
+const CATS = ['business','health','mind','being'];
+const COLOR_VAR = {business:'var(--business)', health:'var(--health)', mind:'var(--mind)', being:'var(--being)'};
+const LABEL = {business:'Business', health:'Health', mind:'Mind', being:'Being'};
+
+let planState = {}; // id -> checked
+
+function totalProgress(){
+  const ids = Object.keys(planState);
+  if(ids.length===0) return 0;
+  const done = ids.filter(id=>planState[id]).length;
+  return done/ids.length;
+}
+
+function updateRail(){
+  const pct = Math.round(totalProgress()*100);
+  const marker = document.getElementById('railMarker');
+  const readout = document.getElementById('railReadout');
+  const isMobile = window.innerWidth <= 720;
+  if(isMobile){
+    marker.style.left = pct + '%';
+  } else {
+    marker.style.bottom = pct + '%';
+  }
+  readout.textContent = pct + '% OUT';
+}
+
+function renderResults(data){
+  document.getElementById('verdict').textContent = data.verdict || '';
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+  planState = {};
+
+  CATS.forEach(cat=>{
+    const c = data.categories && data.categories[cat];
+    if(!c) return;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.setProperty('--cat-color', COLOR_VAR[cat]);
+
+    const chips = (c.items||[]).map(it=>`<span class="chip">${escapeHtml(it)}</span>`).join('');
+
+    const planItems = (c.plan||[]).map((step,i)=>{
+      const id = cat+'-'+i;
+      planState[id] = false;
+      return `<li data-id="${id}">
+        <input type="checkbox" id="chk-${id}">
+        <span class="step">${escapeHtml(step)}</span>
+      </li>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="eyebrow">${LABEL[cat]}</div>
+      <p class="diagnosis">${escapeHtml(c.diagnosis||'')}</p>
+      <div class="chips">${chips}</div>
+      ${c.genius_move ? `<div class="genius"><span class="flag">Do this first</span><span>${escapeHtml(c.genius_move)}</span></div>` : ''}
+      <ul class="plan">${planItems}</ul>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('.plan li').forEach(li=>{
+    const id = li.getAttribute('data-id');
+    const checkbox = li.querySelector('input');
+    const stepSpan = li.querySelector('.step');
+    const toggle = ()=>{
+      planState[id] = !planState[id];
+      checkbox.checked = planState[id];
+      stepSpan.classList.toggle('done', planState[id]);
+      updateRail();
+    };
+    li.addEventListener('click', (e)=>{
+      if(e.target.tagName.toLowerCase()==='input'){ planState[id]=checkbox.checked; stepSpan.classList.toggle('done', planState[id]); updateRail(); }
+      else toggle();
+    });
+  });
+
+  document.getElementById('results').classList.add('active');
+  updateRail();
+  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function digItUp(){
+  const input = document.getElementById('vices').value.trim();
+  const errorBox = document.getElementById('errorBox');
+  errorBox.classList.remove('active');
+  errorBox.textContent = '';
+
+  if(!input){
+    errorBox.textContent = 'Type something first. Even one honest sentence works.';
+    errorBox.classList.add('active');
+    return;
+  }
+
+  const btn = document.getElementById('digBtn');
+  const loadingRow = document.getElementById('loadingRow');
+  btn.disabled = true;
+  loadingRow.classList.add('active');
+
+  const systemPrompt = `You are a blunt, sharp, no-fluff transformation strategist. The user will paste a raw list of their vices, bad habits, and struggles.
+
+Sort every concrete item they mention into exactly one of these four buckets: "health" (body, sleep, substances, food, exercise), "mind" (mental state, focus, anxiety, self-talk, fog), "being" (identity, relationships, discipline, spiritual/purpose drift), "business" (work, money, career, decisions, avoidance at work).
+
+If the user mentions nothing for a bucket, infer one realistic likely blind spot for that bucket based on the rest of what they said, and prefix that item with "(likely) ".
+
+Respond with ONLY raw JSON, no markdown fences, no preamble, no commentary, matching exactly this shape:
+{"verdict":"one punchy sentence, under 18 words, naming their overall situation, no cliches","categories":{"health":{"diagnosis":"under 16 words, direct","items":["short item","short item"],"genius_move":"the single highest-leverage action, under 18 words","plan":["step under 12 words","step under 12 words","step under 12 words"]},"mind":{...same shape...},"being":{...same shape...},"business":{...same shape...}}}
+
+Every category must be present even if inferred. Plan arrays must have exactly 3 steps, ordered by what to do first. No therapy-speak, no "it's okay to feel", no emojis. Talk like a coach who respects the person too much to coddle them.`;
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1200,
+        system: systemPrompt,
+        messages: [{ role: "user", content: input }]
+      })
+    });
+
+    if(!response.ok){
+      throw new Error("Request failed with status " + response.status);
+    }
+
+    const data = await response.json();
+    const textBlock = (data.content || []).find(b=>b.type==='text');
+    if(!textBlock) throw new Error("No text in response");
+
+    let clean = textBlock.text.trim();
+    clean = clean.replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+
+    const parsed = JSON.parse(clean);
+    renderResults(parsed);
+
+  } catch(err){
+    console.error(err);
+    errorBox.textContent = "Couldn't read the results this time. Try again, or trim the input a little.";
+    errorBox.classList.add('active');
+  } finally {
+    btn.disabled = false;
+    loadingRow.classList.remove('active');
+  }
+}
+
+document.getElementById('digBtn').addEventListener('click', digItUp);
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('vices').value = '';
+  planState = {};
+  updateRail();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+window.addEventListener('resize', updateRail);
+updateRail();
+</script>
+
+</body>
+</html>
